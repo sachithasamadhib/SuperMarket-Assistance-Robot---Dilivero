@@ -1,0 +1,338 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+  enum DioMethod { post, get, put, delete }
+  final String baseUrl = 'http://192.168.101.179'; //the Main URL and changes it 
+  Dio _dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        contentType: Headers.jsonContentType,
+        responseType: ResponseType.json,
+        validateStatus: (status) {
+          return status! < 500;
+        },
+      ),
+    );
+    class APIService {
+  APIService._singleton();
+  static final APIService instance = APIService._singleton();
+  // Initialize Dio in the constructor
+  APIService._() {
+    
+  }
+
+  Future<Response> request(
+    String endpoint,
+    DioMethod method, {
+  //  Map<String, dynamic>? param,
+    String? contentType,
+    dynamic formData,
+  }) async {
+    try {
+      late Response response;
+      
+      switch (method) {
+        case DioMethod.post:
+          response = await _dio.post(endpoint);
+          break;
+        case DioMethod.get:
+          response = await _dio.get(endpoint );
+          break;
+        case DioMethod.put:
+          response = await _dio.put(endpoint);
+          break;
+        case DioMethod.delete:
+          response = await _dio.delete(endpoint);
+          break;
+      }
+      
+      return response;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  Exception _handleDioError(DioException e) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+        return Exception('Connection timeout');
+      case DioExceptionType.sendTimeout:
+        return Exception('Send timeout');
+      case DioExceptionType.receiveTimeout:
+        return Exception('Receive timeout');
+      case DioExceptionType.badResponse:
+        return Exception('Bad response: ${e.response?.statusMessage}');
+      case DioExceptionType.cancel:
+        return Exception('Request cancelled');
+      default:
+        return Exception('Network error occurred');
+    }
+  }
+}
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Add your items',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MyHomePage(title: 'Simple Card UI'),
+    );
+  }
+}
+
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(title),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: const [
+          SimpleCard(
+            title: 'Item 1',
+            description: 'This is a description for Item 1. It can be multiple lines long to demonstrate how the card adapts to content.',
+          ),
+          SizedBox(height: 16),
+          SimpleCard(
+            title: 'Item 2',
+            description: 'Here\'s a shorter description for Item 2.',
+          ),
+          SizedBox(height: 16),
+          SimpleCard(
+            title: 'Item 3',
+            description: 'Item 3 has a medium-length description to show variety.',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SimpleCard extends StatelessWidget {
+  final String title;
+  final String description;
+
+  const SimpleCard({
+    super.key,
+    required this.title,
+    required this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      surfaceTintColor: Colors.white, // Helps retain elevation effect
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+      //             final response = await APIService.instance.request(
+      //   '/',
+      //   DioMethod.get,
+      //   contentType: Headers.jsonContentType,
+      // );
+      
+                },
+                child: const Text('Request'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+void main() => runApp(const NavigationBarApp());
+
+class NavigationBarApp extends StatelessWidget {
+  const NavigationBarApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        theme: ThemeData(useMaterial3: true), home: const NavigationExample());
+  }
+}
+
+class NavigationExample extends StatefulWidget {
+  const NavigationExample({super.key});
+
+  @override
+  State<NavigationExample> createState() => _NavigationExampleState();
+}
+
+class _NavigationExampleState extends State<NavigationExample> {
+  int currentPageIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Scaffold(
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
+        indicatorColor: Colors.amber,
+        selectedIndex: currentPageIndex,
+        destinations: const <Widget>[
+          NavigationDestination(
+            selectedIcon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Badge(child: Icon(Icons.notifications_sharp)),
+            label: 'Notifications',
+          ),
+          NavigationDestination(
+            icon: Badge(label: Text('2'), child: Icon(Icons.messenger_sharp)),
+            label: 'Messages',
+          ),
+        ],
+      ),
+      body: <Widget>[
+        /// Home page
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+                child: Text('Home page', style: theme.textTheme.titleLarge)),
+          ),
+        ),
+
+        /// Notifications page
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Card(
+                child: ListTile(
+                  leading: Icon(Icons.notifications_sharp),
+                  title: Text('Notification 1'),
+                  subtitle: Text('This is a notification'),
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  leading: Icon(Icons.notifications_sharp),
+                  title: Text('Notification 2'),
+                  subtitle: Text('This is a notification'),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        /// Messages page
+        ListView.builder(
+          reverse: true,
+          itemCount: 2,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0) {
+              return Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Text(
+                    'Hello',
+                    style: theme.textTheme.bodyLarge!.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              );
+            }
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Text(
+                  'Hi!',
+                  style: theme.textTheme.bodyLarge!.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ][currentPageIndex],
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
