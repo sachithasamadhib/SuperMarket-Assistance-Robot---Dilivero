@@ -74,6 +74,14 @@ Our solution introduces a **smart ordering and robotic collection system**:
 
 ---
 
+## 👥 Contributors
+We are grateful to the following contributors for their valuable efforts in making this possible:
+
+- [Viraj Wathsala Gunasinghe](https://github.com/virajwathsalag)
+- [Sachitha Samadhi Bandara](https://github.com/sachithasamadhib)
+- [Ravin Jayasanka](https://github.com/MrRaveen)
+- [Sanuja Rasanajna](https://github.com/SanujaRasanajna2007)
+
 ## 📷 Demo (Concept)
 Project report : [Project report(updated 1.4)PDF.pdf](https://github.com/user-attachments/files/22168182/Project.report.updated.1.4.PDF.pdf)
 
